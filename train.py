@@ -1,11 +1,9 @@
+import argparse
 import random
 import time
 from typing import Generator
 
 from joblib import dump, load
-import numpy as np
-import pandas as pd
-from scipy import stats
 from sklearn_crfsuite import CRF, metrics, scorers
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import cross_val_score
@@ -91,6 +89,8 @@ class ConditionalRandomFieldsEstimator():
                         )
              )
 
+
+
 class TrainingPipeline():
     def read_conllu_files_to_list(filename:str) -> list:
         files = read_file(filename)
@@ -103,4 +103,37 @@ class TrainingPipeline():
         return X, y
 
 
-    def train_model(X_train, y_train, )
+    def train_model(X_train:list,
+                    y_train:list,
+                    X_dev:list,
+                    y_dev:list):
+        m = ConditionalRandomFieldsEstimator()
+        m.fit(X_train, y_train, X_test, y_test)
+        m.evaluate_training_accuracy(X_train,
+                                     y_train,
+                                     X_test,
+                                     y_test)
+
+    def run(test_file:str,
+            dev_file:str) -> None:
+        train_tb = cls.read_conllu_files_to_list(train_path)
+        dev_tb = cls.read_conllu_files_to_list(dev_path)
+
+        X_train, y_train = cls.extract_features(train_tb)
+        X_dev, y_dev = cls.extract_features(dev_tb)
+
+        cls.train_model(X_train, y_train, X_dev, y_dev)
+
+if name == '__main__':
+    parser = argparse.ArgumentParser(description='Train a POS tagger')
+    parser.add_argument('train_path', type=str, help='a .conllu train file for training')
+    parser.add_argument('dev_path', type=str, help='a .conllu devn file for training')
+    parser.parse_args()
+
+    print("Training Part-of-Speech tagger with Conditional Random Fields")
+    print("*"*80)
+    start = time.time()
+    TrainingPipeline(train_path, dev_path)
+    end = time.time()
+    print("*"*80)
+    print(f"Full training pipepile finished in {roun(end-start, 2)} seconds")
