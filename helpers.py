@@ -26,7 +26,6 @@ def files_to_treebank(files:list) -> list:
         treebank.append((tokens, tags))
     return treebank
 
-
 def get_structure(string:str) -> str:
     """Get the structure of the string, mapping lowercase to x, uppercase to X, numbers to d and
     other characters retained as original."""
