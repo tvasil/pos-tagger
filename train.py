@@ -25,7 +25,11 @@ class ConditionalRandomFieldsEstimator():
         self.preds = []
 
 
-    def fit(self, X_train: Generator, y_train: list) -> None:
+    def fit(self,
+            X_train: Generator,
+            y_train: list,
+            X_test: Generator,
+            y_test: list) -> None:
         st = time.time()
         if not self.model:
             self.model = CRF(
@@ -35,9 +39,20 @@ class ConditionalRandomFieldsEstimator():
                 all_possible_transitions=True)
         else:
             self.model = joblib.load(self.model_filename)
-        self.model.fit(X_train, y_train)
-        self.y_pred_train = self.model.predict(X_train)
-        joblib.dump(self.model, self.model_filename)
+        self.model.fit(
+            X_train,
+            y_train,
+            X_test,
+            y_test)
+
+        joblib.dump(self.model,
+                    self.model_filename)
+        self.evaluate_training_accuracy(
+            X_train,
+            y_train,
+            X_test,
+            y_test
+        )
         et = time.time()
         print(f"The model finished training in {round(et-st, 2)} seconds.")
 
@@ -46,25 +61,46 @@ class ConditionalRandomFieldsEstimator():
         self.preds = self.model.predict(X_test)
 
 
-    def accuracy_score(self, y_train:list, y_test: list):
-        print("F1 score on Test Data")
-        print(metrics.flat_f1_score(y_test, self.preds, average='weighted', labels=self.model.classes_))
-        print("-"*16)
+    def evaluate_training_accuracy(self,
+                                   X_train: Generator,
+                                   y_train: list,
+                                   X_test: Generator,
+                                   y_test: list) -> None:
         print("F1 score on Train Data")
-        print(metrics.flat_f1_score(y_train, self.y_pred_train, average='weighted', labels=self.model.classes_))
+        print(self.model.score(X_train, y_train))
+        print("F1 score on Dev/Test Data")
+        print(self.model.score(X_test, y_test))
 
 
-    def cross_validate(self, X_train:list, y_train:list):
+    def cross_validate(self,
+                       X_train:list,
+                       y_train:list):
         f1_scorer = make_scorer(metrics.flat_f1_score, average='macro')
         scores = cross_validate(self.model, X_train, y_train, scoring=f1_scorer, cv=5)
         print(scores)
 
 
-    def print_classification_report(self, y_test):
+    def print_classification_report(self,
+                                    y_test):
         print("Class wise score:")
         print(metrics.flat_classification_report(
                         y_test,
                         self.preds,
-                        labels=self.model.classes_, digits=3
+                        labels=self.model.classes_,
+                        digits=3
                         )
              )
+
+class TrainingPipeline():
+    def read_conllu_files_to_list(filename:str) -> list:
+        files = read_file(filename)
+        return files_to_treebank(files)
+
+
+    def extract_features(treebank:list) -> tuple:
+        X = [sent2features(s[0]) for s in treebank]
+        y = [s[1] for s in treebank]
+        return X, y
+
+
+    def train_model(X_train, y_train, )
