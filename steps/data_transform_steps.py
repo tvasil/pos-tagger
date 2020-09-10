@@ -3,11 +3,13 @@ from pipeline.pipeline import Step
 
 
 class TransformConlluToTreebank(Step):
+    """Step to tranform files read from a Conllu structure
+    to a treebank, which consists of [([sentence], [tags])]"""
 
-    def run(self, batches: Generator):
+    def run(self, batches: Generator) -> Generator:
         """
-        Kwargs must contain the key "batches" with has the batches read
-        from the conllu files.
+        Runs the tranformation from .conllu files to a treebank
+        which has the structure of (([sentence], [tags]))
         """
         for batch in batches:
             result = []

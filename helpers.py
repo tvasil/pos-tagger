@@ -7,8 +7,10 @@ _BATCH_SIZE = 10
 
 
 def read_conllu_file(filenames: str, batch_size=_BATCH_SIZE) -> Generator:
-    """Reads all .conllu files and returns a list of lists of files,
-    one per filename provided"""
+    """
+    Reads all .conllu files and returns a list of lists of files,
+    one per filename provided
+    """
     for filename in filenames:
         with open(filename, "r", encoding="utf-8") as file:
             minibatch = []
@@ -23,7 +25,9 @@ def read_conllu_file(filenames: str, batch_size=_BATCH_SIZE) -> Generator:
 
 
 def read_txt_file(filename: str) -> Generator:
-    """Reads txt files with one sentence per line"""
+    """
+    Reads txt files with one sentence per line
+    """
     with open(filename, "r", encoding="utf-8") as file:
         while True:
             data = file.readline()
@@ -33,8 +37,10 @@ def read_txt_file(filename: str) -> Generator:
 
 
 def get_structure(string: str) -> str:
-    """Get the structure of the string, mapping lowercase to x, uppercase
-    to X, numbers to d and other characters retained as original."""
+    """
+    Get the structure of the string, mapping lowercase to x, uppercase
+    to X, numbers to d and other characters retained as original.
+    """
     output = ''
     for i in string:
         if i.isnumeric():
@@ -49,9 +55,11 @@ def get_structure(string: str) -> str:
 
 
 def extract_features(sentence: list, i: int) -> dict:
-    """Extract features from every word-sentence, by looking at parts of
+    """
+    Extract features from every word-sentence, by looking at parts of
     the word itself, as well as surrounding words, and the whole
-    sentence."""
+    sentence.
+    """
     features = {
         'word': sentence[i],
         'word.lower': sentence[i].lower(),
@@ -91,6 +99,8 @@ def extract_features(sentence: list, i: int) -> dict:
 
 
 def sent2features(sentence: list) -> list:
-    """Extracts features from every word of a sentence iteratively"""
+    """
+    Extracts features from every word of a sentence iteratively
+    """
     return [extract_features(sentence, i)
             for i in range(len(sentence))]

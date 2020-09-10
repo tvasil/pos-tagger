@@ -9,6 +9,10 @@ from pipeline.pipeline import Step
 
 
 class CRFEvaluateStep(Step):
+    """
+    Step to evaluate testing data against a CRF model,
+    stored on file
+    """
     def __init__(self, model_file_path):
         self.model_file_path = path.abspath(path.expanduser(model_file_path))
         self.model = CRF(
@@ -18,11 +22,16 @@ class CRFEvaluateStep(Step):
                 all_possible_transitions=True,
                 model_filename=self.model_file_path)
 
-    def run(self, batches: Generator):
+    def run(self, batches: Generator) -> None:
+        """
+        Runs the CRF model, storing to pickle in the end
+        """
         st = time.time()
 
         x = []
         y = []
+
+        # For prediction, CRF does not implement batching, so we pass a list
         for batch in batches:
             b = list(batch)
             x.extend(b[0])

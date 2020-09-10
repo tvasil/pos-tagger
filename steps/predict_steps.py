@@ -7,6 +7,9 @@ from pipeline.pipeline import Step
 
 
 class CRFPredictStep(Step):
+    """
+    Step to get predictions from features using a CRF model, for specific sentences.
+    """
     def __init__(self, model_file_path):
         self.model_file_path = path.abspath(path.expanduser(model_file_path))
         self.model = CRF(
@@ -16,7 +19,10 @@ class CRFPredictStep(Step):
                 all_possible_transitions=True,
                 model_filename=self.model_file_path)
 
-    def run(self, batches: Generator):
+    def run(self, batches: Generator) -> None:
+        """
+        Runs the step
+        """
         features = list(batches)
         pred = self.model.predict(features)
         for index, feature in enumerate(features):

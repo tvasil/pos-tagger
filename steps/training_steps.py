@@ -7,6 +7,9 @@ from pipeline.pipeline import Step
 
 
 class CRFTrainStep(Step):
+    """
+    Step to train a CRF model iteratively by updating the matrices.
+    """
     def __init__(self, model_file_path):
         # load the model if it exists
         self.model_file_path = path.abspath(path.expanduser(model_file_path))
@@ -18,6 +21,9 @@ class CRFTrainStep(Step):
                 model_filename=self.model_file_path)
 
     def run(self, batches: Generator):
+        """
+        Runs the step
+        """
         st = time.time()
 
         x = []
@@ -30,4 +36,4 @@ class CRFTrainStep(Step):
         self.model = self.model.fit(x, y)
 
         et = time.time()
-        print(f"The model finished training in {round(et-st, 2)} seconds.")
+        print(f"The CRF model finished training in {round(et-st, 2)} seconds.")
