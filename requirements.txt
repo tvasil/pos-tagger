@@ -1,0 +1,3 @@
+sklearn_crfsuite==0.8.3
+conllu==4.1
+sklearn==0.23.2
