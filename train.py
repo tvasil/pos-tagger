@@ -16,6 +16,9 @@ if __name__ == "__main__":
                         help='a .conllu devn file for training')
     args = parser.parse_args()
 
+    print("Training POS tagger with Conditional Random Fields")
+    print("*"*80)
+
     training_pipeline = pipeline.pipeline.Pipeline(
         steps=[LoadConlluDataStep([args.train_path, args.dev_path], 10),
                TransformConlluToTreebank(),

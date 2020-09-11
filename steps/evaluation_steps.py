@@ -39,7 +39,7 @@ class CRFEvaluateStep(Step):
 
         accuracy = self.model.score(x, y)
         y_pred = self.model.predict(x)
-        f1_score = metrics.flat_f1_score(y, y_pred)
+        f1_score = metrics.flat_f1_score(y, y_pred, average='weighted')
         accuracy_sentence = metrics.sequence_accuracy_score(y, y_pred)
         classification_report = metrics.flat_classification_report(
             y,
