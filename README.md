@@ -89,6 +89,6 @@ Some of the trade-offs I had to make:
 - If I had more time I would look into vectorizing or hashing the feature set (dictionary)
 - Cross validation and Hyperparameter optimization with `RandomizedSearchCV` takes a long time (over 20' on my machine) so I decided to not implement it in this project for simplicity's sake. However, if we were truly interested in the prediction accuracy of the model (and wanted to train it on a different corpus or language), I would certainly build those two into the training pipeline.
 - In choosing the model, I had to make a choice between capacity for out-of-core training (as well as ease of implementation) and performance in sequence modelling tasks specifically. If we know that the model needs to be retrained online as new observations come in, I would choose a model that implements incremental learning ([`.partial_fit()` method in scikit-learn](https://scikit-learn.org/stable/modules/computing.html)). However, none of those models are particularly good at solving Sequence tasks, at least out-of-the-box. Assuming that tagged POS data is hard to get and the need for out-of-core retraining of the model is unlikely, I decided to go with an algorithm that has proven good at the particular task, to the detriment of potential out-of-core learning.
--
+
 ### Time spent
 I spent around 15 hours on this project, approximately half of it on research on the problem and half coding.
