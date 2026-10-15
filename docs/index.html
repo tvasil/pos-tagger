@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="An interactive explanation of context-aware part-of-speech tagging with a conditional random field."
+    >
+    <title>Inside a context-aware POS tagger</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="POS tagger demo home">
+        <span class="brand-mark" aria-hidden="true">Aa</span>
+        <span>Context Tags</span>
+      </a>
+      <span class="prototype-badge">Fixture-based prototype</span>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Conditional random field · visualized</p>
+          <h1 id="page-title">A word does not choose its tag alone.</h1>
+          <p class="hero-intro">
+            Change the sentence around <em>can</em> and see its grammatical role change.
+            This tagger considers each word, its neighbors, and the surrounding tag sequence.
+          </p>
+        </div>
+
+        <div class="sequence-card" aria-label="How the tagger reaches a prediction">
+          <p class="sequence-title">From sentence to sequence</p>
+          <ol>
+            <li><span>01</span> Observe each token</li>
+            <li><span>02</span> Read local context</li>
+            <li><span>03</span> Score the full tag sequence</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="demo-shell" aria-labelledby="demo-title">
+        <div class="demo-heading">
+          <div>
+            <p class="eyebrow">Interactive demo</p>
+            <h2 id="demo-title">Try the same word in two contexts</h2>
+          </div>
+          <p class="mock-note">
+            <strong>Prototype note:</strong> POS predictions are precomputed for the examples below.
+            Feature inspection and interactions are live.
+          </p>
+        </div>
+
+        <form id="sentence-form" class="sentence-form">
+          <label for="sentence-input">Sentence</label>
+          <div class="input-row">
+            <input
+              id="sentence-input"
+              name="sentence"
+              type="text"
+              value="I can fish."
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="input-help form-status"
+            >
+            <button type="submit">Tag sentence</button>
+          </div>
+          <div class="input-footer">
+            <p id="input-help">This prototype recognizes the two precomputed examples.</p>
+            <div class="example-buttons" aria-label="Example sentences">
+              <button class="example-button" type="button" data-example="I can fish.">I can fish.</button>
+              <button class="example-button" type="button" data-example="A can of fish.">A can of fish.</button>
+            </div>
+          </div>
+          <p id="form-status" class="form-status" role="status" aria-live="polite" tabindex="-1"></p>
+        </form>
+
+        <div class="results-grid">
+          <section class="tokens-panel" aria-labelledby="tokens-title">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Predicted sequence</p>
+                <h3 id="tokens-title">Select a token to inspect it</h3>
+              </div>
+              <span class="token-count" id="token-count"></span>
+            </div>
+
+            <div id="token-list" class="token-list" aria-label="Tagged tokens"></div>
+
+            <div class="legend" aria-labelledby="legend-title">
+              <h4 id="legend-title">Tag legend</h4>
+              <ul id="tag-legend"></ul>
+            </div>
+          </section>
+
+          <aside class="inspector" aria-labelledby="inspector-title">
+            <div class="inspector-heading">
+              <div>
+                <p class="panel-kicker">Token features</p>
+                <h3 id="inspector-title">Choose a token</h3>
+              </div>
+              <span id="inspector-tag" class="inspector-tag"></span>
+            </div>
+            <p id="inspector-summary" class="inspector-summary">
+              Select any tagged word to see the observations made available to the CRF.
+            </p>
+            <div id="feature-groups" class="feature-groups"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="comparison" aria-labelledby="comparison-title">
+        <div class="comparison-copy">
+          <p class="eyebrow">The context test</p>
+          <h2 id="comparison-title">Same spelling. Different evidence.</h2>
+          <p>
+            The lexical features of <em>can</em> stay the same. Its neighbors change, giving the
+            sequence model different evidence for <strong>auxiliary</strong> and <strong>noun</strong>.
+          </p>
+        </div>
+
+        <div id="comparison-cards" class="comparison-cards"></div>
+
+        <p class="interpretation-note">
+          This prototype shows relevant inputs, not a learned-weight explanation. The production
+          version will calculate the complete sequence from exported CRF weights in the browser.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Built to make sequence modeling visible.</p>
+      <p>Universal Dependencies POS labels · Static, backend-free prototype</p>
+    </footer>
+
+    <script src="fixtures.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

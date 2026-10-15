@@ -2,6 +2,20 @@
 
 This project builds a [part-of-speech tagger](https://en.wikipedia.org/wiki/Part-of-speech_tagging) built using the [Conditional Random Fields](https://en.wikipedia.org/wiki/Conditional_random_field) probabilistic method. The projects contains all files you need to train, evaluate and make individual predictions on new observations.
 
+## Interactive prototype
+
+The `docs/` directory contains a dependency-free visual prototype that demonstrates how sentence context can change a word's part-of-speech tag. Its POS predictions are precomputed fixtures; it does not load or run the trained CRF model. The token feature inspector and interface interactions run locally in the browser.
+
+The fixtures treat punctuation as separate tokens. This is intentionally clearer for the demonstration but differs from the current prediction script, which splits input only on whitespace. A production browser implementation will need an explicit tokenizer shared with or validated against Python.
+
+To preview it, run:
+
+```bash
+python3 -m http.server 8000 --directory docs
+```
+
+Then open `http://localhost:8000`.
+
 ## How to run
 1. (Create new virtual env using `requirements.txt` )
 2.  Train the model by running:
