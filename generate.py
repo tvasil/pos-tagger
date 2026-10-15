@@ -10,12 +10,15 @@ if __name__ == "__main__":
     parser.add_argument('test_path',
                         type=str,
                         help='txt file to get predictions on')
+    parser.add_argument('--model-path',
+                        default='./crf_model.crfsuite',
+                        help='path to the native CRFsuite model')
     args = parser.parse_args()
 
     eval_pipeline = pipeline.pipeline.Pipeline(
         steps=[LoadTxtDataStep(args.test_path),
                ExtractFeaturesForCRFFromList(),
-               CRFPredictStep('./crf_model.joblib')
+               CRFPredictStep(args.model_path)
                ]
     )
     eval_pipeline.run()

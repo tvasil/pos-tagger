@@ -2,11 +2,11 @@
 
 This project builds a [part-of-speech tagger](https://en.wikipedia.org/wiki/Part-of-speech_tagging) built using the [Conditional Random Fields](https://en.wikipedia.org/wiki/Conditional_random_field) probabilistic method. The projects contains all files you need to train, evaluate and make individual predictions on new observations.
 
-## Interactive prototype
+## Static browser demo
 
-The `docs/` directory contains a dependency-free visual prototype that demonstrates how sentence context can change a word's part-of-speech tag. Its POS predictions are precomputed fixtures; it does not load or run the trained CRF model. The token feature inspector and interface interactions run locally in the browser.
+The `docs/` directory contains a dependency-free, backend-free visual demo. It starts with two clearly labeled precomputed examples that explain contextual tagging, then lets visitors tag arbitrary English sentences using the real CRF entirely in the browser.
 
-The fixtures treat punctuation as separate tokens. This is intentionally clearer for the demonstration but differs from the current prediction script, which splits input only on whitespace. A production browser implementation will need an explicit tokenizer shared with or validated against Python.
+The browser downloads a 5.2 MB JSON artifact containing the trained model's 17 labels, 235,380 state-feature weights, and 289 transition weights. JavaScript ports the Python feature extraction and runs first-order Viterbi decoding locally; it does not run `sklearn-crfsuite` or substitute a different model.
 
 To preview it, run:
 
@@ -15,6 +15,51 @@ python3 -m http.server 8000 --directory docs
 ```
 
 Then open `http://localhost:8000`.
+
+The included artifact was trained on UD English GUM train + dev at revision `1fe635509c649e376dfb449d528424ab78f4eaee`. It reaches 95.9% token accuracy on that revision's test split. Browser predictions match Python CRFsuite predictions across all 1,464 test sentences under the shared demo tokenizer.
+
+### Browser-model workflow
+
+Training remains offline in Python and writes a native CRFsuite model:
+
+```bash
+python3 train.py path/to/train.conllu path/to/dev.conllu \
+  --model-path crf_model.crfsuite
+```
+
+Export the learned weights and a small parity fixture:
+
+```bash
+python3 export_model.py crf_model.crfsuite docs/model/crf-model.json \
+  --corpus-name "UD English GUM" \
+  --corpus-revision YOUR_CORPUS_REVISION \
+  --corpus-license "CC BY-NC-SA 4.0"
+```
+
+Validate the committed parity cases in Node:
+
+```bash
+node scripts/validate-browser-model.js
+```
+
+For a corpus-wide comparison, generate Python predictions and pass them to the same validator:
+
+```bash
+python3 scripts/build_validation_cases.py \
+  crf_model.crfsuite path/to/test.conllu /tmp/browser-validation.json
+node scripts/validate-browser-model.js \
+  docs/model/crf-model.json /tmp/browser-validation.json
+```
+
+Current limitations:
+
+- The shared tokenizer separates punctuation and keeps apostrophes inside words, but it is not a complete Universal Dependencies tokenizer. Complex contractions and corpus-specific multiword tokens may differ.
+- The JSON is loaded lazily on the first live prediction. It is much smaller than the 12 MB native model but remains a meaningful download.
+- The UI exposes signed state and transition weights, not confidence percentages. Token marginals would require a forward-backward implementation in addition to Viterbi.
+- The feature port targets this English model. Some Unicode casing behavior can differ between Python and JavaScript outside the training domain.
+- UD English GUM is distributed under [CC BY-NC-SA 4.0](https://github.com/UniversalDependencies/UD_English-GUM/blob/master/LICENSE.txt). Review its attribution, non-commercial, and share-alike terms before redistributing or using the trained artifact beyond this portfolio demo.
+
+Model and library references: [sklearn-crfsuite](https://sklearn-crfsuite.readthedocs.io/en/latest/), [python-crfsuite API](https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html), and the [original CRFsuite implementation](https://github.com/chokkan/crfsuite).
 
 ## How to run
 1. (Create new virtual env using `requirements.txt` )
@@ -29,13 +74,13 @@ python3 train.py "path_to_train_file.conllu" "path_to_test_file.conllu"
 ```bash
 python3 eval.py "path_to_test_file.conllu "
 ```
-(_note_: you must first train the model, so a pickled model file is generated in the directory)
+(_note_: you must first train the model, which generates a native CRFsuite model file)
 
 4. Generate new predictions by running:
 ```bash
 python3 generate.py "text_file.txt"
 ```
-_Note_: I assume that the `test`, `dev` and `train` files would be in Conllu format, as provided by the [Universal Dependencies Project](https://github.com/UniversalDependencies/UD_English-GUM/tree/master), while the simple text file to generate new predictions a text file with one sentence per line, _already tokenized_. For example:
+_Note_: I assume that the `test`, `dev` and `train` files are in CoNLL-U format, as provided by the [Universal Dependencies Project](https://github.com/UniversalDependencies/UD_English-GUM/tree/master). The text prediction file contains one sentence per line; the shared lightweight tokenizer is applied automatically. For example:
 
 > I love food
 >

@@ -11,13 +11,16 @@ if __name__ == "__main__":
     parser.add_argument('test_path',
                         type=str,
                         help='a .conllu train file for evaluating accuracy')
+    parser.add_argument('--model-path',
+                        default='./crf_model.crfsuite',
+                        help='path to the native CRFsuite model')
     args = parser.parse_args()
 
     eval_pipeline = pipeline.pipeline.Pipeline(
         steps=[LoadConlluDataStep([args.test_path], 10),
                TransformConlluToTreebank(),
                ExtractFeaturesForCRFFromTreebank(),
-               CRFEvaluateStep('./crf_model.joblib')
+               CRFEvaluateStep(args.model_path)
                ]
     )
     eval_pipeline.run()

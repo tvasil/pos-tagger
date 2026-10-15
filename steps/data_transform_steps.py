@@ -17,6 +17,13 @@ class TransformConlluToTreebank(Step):
                 tokens = []
                 tags = []
                 for token in sentence:
+                    # CoNLL-U multiword-token rows use range IDs and do not
+                    # carry UPOS labels. Only syntactic word rows belong in
+                    # the CRF sequence.
+                    if not isinstance(token['id'], int):
+                        continue
+                    if token['upostag'] in (None, '_'):
+                        continue
                     tokens.append(token['form'])
                     tags.append(token['upostag'])
                 result.append((tokens, tags))

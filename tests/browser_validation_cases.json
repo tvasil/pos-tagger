@@ -1,0 +1,177 @@
+[
+  {
+    "sentence": "I can fish.",
+    "tokens": [
+      "I",
+      "can",
+      "fish",
+      "."
+    ],
+    "tags": [
+      "PRON",
+      "AUX",
+      "VERB",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "A can of fish.",
+    "tokens": [
+      "A",
+      "can",
+      "of",
+      "fish",
+      "."
+    ],
+    "tags": [
+      "DET",
+      "NOUN",
+      "ADP",
+      "NOUN",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "Time flies like an arrow.",
+    "tokens": [
+      "Time",
+      "flies",
+      "like",
+      "an",
+      "arrow",
+      "."
+    ],
+    "tags": [
+      "NOUN",
+      "VERB",
+      "ADP",
+      "DET",
+      "NOUN",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "Fruit flies like a banana.",
+    "tokens": [
+      "Fruit",
+      "flies",
+      "like",
+      "a",
+      "banana",
+      "."
+    ],
+    "tags": [
+      "NOUN",
+      "VERB",
+      "ADP",
+      "DET",
+      "NOUN",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "The quick brown fox jumps over the lazy dog.",
+    "tokens": [
+      "The",
+      "quick",
+      "brown",
+      "fox",
+      "jumps",
+      "over",
+      "the",
+      "lazy",
+      "dog",
+      "."
+    ],
+    "tags": [
+      "DET",
+      "ADJ",
+      "ADJ",
+      "NOUN",
+      "NOUN",
+      "ADP",
+      "DET",
+      "ADJ",
+      "NOUN",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "Book that flight.",
+    "tokens": [
+      "Book",
+      "that",
+      "flight",
+      "."
+    ],
+    "tags": [
+      "VERB",
+      "DET",
+      "NOUN",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "Can you book a flight?",
+    "tokens": [
+      "Can",
+      "you",
+      "book",
+      "a",
+      "flight",
+      "?"
+    ],
+    "tags": [
+      "AUX",
+      "PRON",
+      "VERB",
+      "DET",
+      "NOUN",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "NASA launched Apollo 11.",
+    "tokens": [
+      "NASA",
+      "launched",
+      "Apollo",
+      "11",
+      "."
+    ],
+    "tags": [
+      "PROPN",
+      "VERB",
+      "PROPN",
+      "NUM",
+      "PUNCT"
+    ]
+  },
+  {
+    "sentence": "State-of-the-art tools work.",
+    "tokens": [
+      "State",
+      "-",
+      "of",
+      "-",
+      "the",
+      "-",
+      "art",
+      "tools",
+      "work",
+      "."
+    ],
+    "tags": [
+      "NOUN",
+      "PUNCT",
+      "ADP",
+      "PUNCT",
+      "DET",
+      "PUNCT",
+      "NOUN",
+      "NOUN",
+      "NOUN",
+      "PUNCT"
+    ]
+  }
+]

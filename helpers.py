@@ -1,9 +1,11 @@
 from io import open
+import re
 
 from conllu import parse_incr
 from typing import Generator
 
 _BATCH_SIZE = 10
+_TOKEN_PATTERN = re.compile(r"\w+(?:['’]\w+)*|[^\w\s]", re.UNICODE)
 
 
 def read_conllu_file(filenames: str, batch_size=_BATCH_SIZE) -> Generator:
@@ -34,6 +36,16 @@ def read_txt_file(filename: str) -> Generator:
             if not data:
                 break
             yield data
+
+
+def tokenize(text: str) -> list:
+    """Tokenize text with the small, dependency-free browser demo contract.
+
+    This is intentionally not a full Universal Dependencies tokenizer. It keeps
+    apostrophes inside words and separates other punctuation so Python and the
+    static browser implementation can receive the same token sequence.
+    """
+    return _TOKEN_PATTERN.findall(text)
 
 
 def get_structure(string: str) -> str:

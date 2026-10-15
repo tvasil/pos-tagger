@@ -14,6 +14,9 @@ if __name__ == "__main__":
     parser.add_argument('dev_path',
                         type=str,
                         help='a .conllu devn file for training')
+    parser.add_argument('--model-path',
+                        default='./crf_model.crfsuite',
+                        help='where to write the native CRFsuite model')
     args = parser.parse_args()
 
     print("Training POS tagger with Conditional Random Fields")
@@ -23,7 +26,7 @@ if __name__ == "__main__":
         steps=[LoadConlluDataStep([args.train_path, args.dev_path], 10),
                TransformConlluToTreebank(),
                ExtractFeaturesForCRFFromTreebank(),
-               CRFTrainStep('./crf_model.joblib')
+               CRFTrainStep(args.model_path)
                ]
     )
     training_pipeline.run()

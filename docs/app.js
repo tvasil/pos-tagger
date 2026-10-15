@@ -15,9 +15,22 @@
   const inspectorSummary = document.querySelector("#inspector-summary");
   const featureGroups = document.querySelector("#feature-groups");
   const comparisonCards = document.querySelector("#comparison-cards");
+  const liveForm = document.querySelector("#live-form");
+  const liveInput = document.querySelector("#live-input");
+  const liveStatus = document.querySelector("#live-status");
+  const liveResults = document.querySelector("#live-results");
+  const liveTokenList = document.querySelector("#live-token-list");
+  const liveTokenCount = document.querySelector("#live-token-count");
+  const evidenceTag = document.querySelector("#evidence-tag");
+  const evidenceSummary = document.querySelector("#evidence-summary");
+  const transitionEvidence = document.querySelector("#transition-evidence");
+  const contributionList = document.querySelector("#contribution-list");
 
   let currentFixture = fixtures[0];
   let selectedIndex = currentFixture.focusToken;
+  let browserModelPromise;
+  let livePrediction;
+  let liveSelectedIndex = 0;
 
   function normalizeSentence(value) {
     return value.trim().replace(/\s+/g, " ").replace(/\s+([.!?,;:])/g, "$1").toLowerCase();
@@ -28,76 +41,53 @@
     return fixtures.find((fixture) => normalizeSentence(fixture.sentence) === normalized);
   }
 
-  function isUpper(value) {
-    return /\p{L}/u.test(value) && value === value.toLocaleUpperCase();
-  }
-
-  function isLower(value) {
-    return /\p{L}/u.test(value) && value === value.toLocaleLowerCase();
-  }
-
-  function isTitle(value) {
-    if (!value || !/\p{L}/u.test(value[0])) return false;
-    return value[0] === value[0].toLocaleUpperCase() && value.slice(1) === value.slice(1).toLocaleLowerCase();
-  }
-
-  function getStructure(value) {
-    return Array.from(value, (character) => {
-      if (/\p{N}/u.test(character)) return "d";
-      if (/\p{Lu}/u.test(character)) return "X";
-      if (/\p{Ll}/u.test(character)) return "x";
-      return character;
-    }).join("");
-  }
-
   function extractFeatures(tokens, index) {
-    const word = tokens[index].text;
+    const words = tokens.map((token) => token.text);
+    const raw = window.PosCrf.extractTokenFeatures(words, index);
     const features = {
       lexical: [
-        ["Original", word],
-        ["Lowercase", word.toLocaleLowerCase()],
-        ["Prefix · 1", word.slice(0, 1)],
-        ["Prefix · 2", word.slice(0, 2)],
-        ["Prefix · 3", word.slice(0, 3)],
-        ["Suffix · 1", word.slice(-1)],
-        ["Suffix · 2", word.slice(-2)],
-        ["Suffix · 3", word.slice(-3)]
+        ["Original", raw.word],
+        ["Lowercase", raw["word.lower"]],
+        ["Prefix · 1", raw["pre-1"]],
+        ["Prefix · 2", raw["pre-2"]],
+        ["Prefix · 3", raw["pre-3"]],
+        ["Suffix · 1", raw["suf-1"]],
+        ["Suffix · 2", raw["suf-2"]],
+        ["Suffix · 3", raw["suf-3"]]
       ],
       shape: [
-        ["Structure", getStructure(word)],
-        ["Title case", isTitle(word)],
-        ["All caps", isUpper(word)],
-        ["All lowercase", isLower(word)],
-        ["Alphabetic", /^\p{L}+$/u.test(word)],
-        ["Alphanumeric", /^[\p{L}\p{N}]+$/u.test(word)],
-        ["Numeric", /^\p{N}+$/u.test(word)],
-        ["Has hyphen", word.includes("-")],
-        ["Capitals inside", word.slice(1).toLocaleLowerCase() !== word.slice(1)]
+        ["Structure", raw.structure],
+        ["Title case", raw.is_title],
+        ["All caps", raw.is_all_caps],
+        ["All lowercase", raw.is_all_lower],
+        ["Alphabetic", raw.is_only_alpha],
+        ["Alphanumeric", raw.is_alphanumeric],
+        ["Numeric", raw.is_numeric],
+        ["Has hyphen", raw.has_hyphen],
+        ["Capitals inside", raw.capitals_inside]
       ],
       position: [
-        ["First token", index === 0],
-        ["Last token", index === tokens.length - 1]
+        ["First token", raw.is_first],
+        ["Last token", raw.is_last]
       ],
       context: []
     };
 
     if (index > 0) {
-      const previous = tokens[index - 1].text;
       features.context.push(
-        ["Previous word", previous],
-        ["Previous lowercase", previous.toLocaleLowerCase()],
-        ["Previous is title case", isTitle(previous)],
-        ["Previous is first", index - 1 === 0]
+        ["Previous word", raw["prev.word"]],
+        ["Previous lowercase", raw["prev.word.lower"]],
+        ["Previous is title case", raw["prev.word.is_title"]],
+        ["Previous is first", raw["prev.word.is_first"]]
       );
     }
 
     if (index < tokens.length - 1) {
-      const next = tokens[index + 1].text;
       features.context.push(
-        ["Next word", next],
-        ["Next lowercase", next.toLocaleLowerCase()],
-        ["Next is title case", isTitle(next)],
-        ["Next is last", index + 1 === tokens.length - 1]
+        ["Next word", raw["next.word"]],
+        ["Next lowercase", raw["next.word.lower"]],
+        ["Next is title case", raw["next.word.is_title"]],
+        ["Next is last", raw["next.word.is_last"]]
       );
     }
 
@@ -236,6 +226,93 @@
     });
   }
 
+  function loadBrowserModel() {
+    if (!browserModelPromise) {
+      browserModelPromise = fetch("model/crf-model.json")
+        .then((response) => {
+          if (!response.ok) throw new Error(`Model request failed with ${response.status}.`);
+          return response.json();
+        })
+        .then(window.PosCrf.validateModel)
+        .catch((error) => {
+          browserModelPromise = undefined;
+          throw error;
+        });
+    }
+    return browserModelPromise;
+  }
+
+  function renderEvidence(model) {
+    const token = livePrediction.tokens[liveSelectedIndex];
+    const tag = livePrediction.tags[liveSelectedIndex];
+    const definition = tagDefinitions[tag];
+    const contributions = window.PosCrf.featureContributions(
+      livePrediction.features[liveSelectedIndex],
+      tag,
+      model
+    );
+
+    evidenceTag.textContent = `${tag} · ${definition.name}`;
+    evidenceTag.className = `inspector-tag inspector-tag--${definition.color}`;
+    evidenceSummary.textContent = `Strongest state-feature weights supporting or opposing “${token}” as ${definition.name.toLowerCase()}.`;
+    contributionList.replaceChildren();
+
+    contributions.slice(0, 9).forEach(({ attribute, contribution }) => {
+      const item = document.createElement("li");
+      const name = document.createElement("code");
+      const score = document.createElement("span");
+      name.textContent = attribute;
+      score.textContent = `${contribution >= 0 ? "+" : ""}${contribution.toFixed(3)}`;
+      score.className = contribution >= 0 ? "score-positive" : "score-negative";
+      item.append(name, score);
+      contributionList.append(item);
+    });
+
+    if (liveSelectedIndex === 0) {
+      transitionEvidence.textContent = "Sequence start · no previous-tag transition";
+    } else {
+      const previousTag = livePrediction.tags[liveSelectedIndex - 1];
+      const transition = window.PosCrf.transitionContribution(previousTag, tag, model);
+      transitionEvidence.replaceChildren();
+      const label = document.createElement("span");
+      const score = document.createElement("strong");
+      label.textContent = `${previousTag} → ${tag} transition`;
+      score.textContent = `${transition >= 0 ? "+" : ""}${transition.toFixed(3)}`;
+      score.className = transition >= 0 ? "score-positive" : "score-negative";
+      transitionEvidence.append(label, score);
+    }
+  }
+
+  function selectLiveToken(index, model) {
+    liveSelectedIndex = index;
+    liveTokenList.querySelectorAll(".token").forEach((button) => {
+      button.setAttribute("aria-pressed", String(Number(button.dataset.index) === index));
+    });
+    renderEvidence(model);
+  }
+
+  function renderLivePrediction(model) {
+    liveTokenList.replaceChildren();
+    livePrediction.tokens.forEach((text, index) => {
+      const tag = livePrediction.tags[index];
+      const definition = tagDefinitions[tag];
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `token token--${definition.color}`;
+      button.dataset.index = String(index);
+      button.setAttribute("aria-pressed", String(index === liveSelectedIndex));
+      button.setAttribute("aria-label", `${text}, ${definition.name}. Inspect learned evidence.`);
+      button.innerHTML = `<span class="token-word"></span><span class="token-tag"></span>`;
+      button.querySelector(".token-word").textContent = text;
+      button.querySelector(".token-tag").textContent = tag;
+      button.addEventListener("click", () => selectLiveToken(index, model));
+      liveTokenList.append(button);
+    });
+    liveTokenCount.textContent = `${livePrediction.tokens.length} tokens`;
+    liveResults.hidden = false;
+    renderEvidence(model);
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const fixture = findFixture(input.value);
@@ -250,6 +327,33 @@
 
   document.querySelectorAll(".example-button").forEach((button) => {
     button.addEventListener("click", () => renderFixture(findFixture(button.dataset.example)));
+  });
+
+  liveForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const tokens = window.PosCrf.tokenize(liveInput.value);
+    if (tokens.length === 0) {
+      liveStatus.textContent = "Enter a sentence to tag.";
+      return;
+    }
+    if (tokens.length > 80) {
+      liveStatus.textContent = "Keep this demo to 80 tokens or fewer.";
+      return;
+    }
+
+    liveStatus.textContent = "Loading the exported CRF and decoding locally…";
+    const startedAt = performance.now();
+    try {
+      const model = await loadBrowserModel();
+      livePrediction = window.PosCrf.tagTokens(tokens, model);
+      liveSelectedIndex = 0;
+      renderLivePrediction(model);
+      const elapsed = Math.max(1, Math.round(performance.now() - startedAt));
+      liveStatus.textContent = `Tagged ${tokens.length} tokens locally in ${elapsed} ms. Model weights are cached for the next sentence.`;
+    } catch (error) {
+      liveResults.hidden = true;
+      liveStatus.textContent = `The browser model could not be loaded: ${error.message}`;
+    }
   });
 
   renderFixture(currentFixture);

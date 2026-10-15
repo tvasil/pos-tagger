@@ -16,7 +16,7 @@
         <span class="brand-mark" aria-hidden="true">Aa</span>
         <span>Context Tags</span>
       </a>
-      <span class="prototype-badge">Fixture-based prototype</span>
+      <span class="prototype-badge">Browser CRF · no backend</span>
     </header>
 
     <main id="top">
@@ -123,17 +123,112 @@
         <div id="comparison-cards" class="comparison-cards"></div>
 
         <p class="interpretation-note">
-          This prototype shows relevant inputs, not a learned-weight explanation. The production
-          version will calculate the complete sequence from exported CRF weights in the browser.
+          This opening example shows relevant inputs rather than claiming a causal explanation.
+          The live model below exposes actual learned weights and decodes the full sequence locally.
         </p>
+      </section>
+
+      <section class="live-shell" aria-labelledby="live-title">
+        <div class="live-heading">
+          <div>
+            <p class="eyebrow">Full browser model</p>
+            <h2 id="live-title">Now try your own sentence.</h2>
+          </div>
+          <div class="local-model-note">
+            <span class="local-model-dot" aria-hidden="true"></span>
+            <p><strong>Runs locally.</strong> The exported CRF weights and Viterbi decoder stay in your browser.</p>
+          </div>
+        </div>
+
+        <form id="live-form" class="live-form">
+          <label for="live-input">Any English sentence</label>
+          <div class="input-row">
+            <input
+              id="live-input"
+              name="sentence"
+              type="text"
+              value="The quick brown fox jumps over the lazy dog."
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="live-help live-status"
+            >
+            <button type="submit">Run CRF locally</button>
+          </div>
+          <div class="live-form-footer">
+            <p id="live-help">The 5.2 MB model loads on first use. No text is sent anywhere.</p>
+            <p class="tokenizer-note">Uses a lightweight demo tokenizer; complex UD tokenization may differ.</p>
+          </div>
+          <p id="live-status" class="live-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div id="live-results" class="live-results" hidden>
+          <section class="live-sequence" aria-labelledby="live-sequence-title">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Decoded sequence</p>
+                <h3 id="live-sequence-title">Select a token to inspect its score</h3>
+              </div>
+              <span id="live-token-count" class="token-count"></span>
+            </div>
+            <div id="live-token-list" class="token-list" aria-label="Locally tagged tokens"></div>
+            <p class="sequence-explanation">
+              Viterbi finds the highest-scoring tag sequence using both token features and transitions
+              between neighboring tags.
+            </p>
+          </section>
+
+          <aside class="evidence-panel" aria-labelledby="evidence-title">
+            <div class="inspector-heading">
+              <div>
+                <p class="panel-kicker">Learned evidence</p>
+                <h3 id="evidence-title">Feature contributions</h3>
+              </div>
+              <span id="evidence-tag" class="inspector-tag"></span>
+            </div>
+            <p id="evidence-summary" class="inspector-summary"></p>
+            <div id="transition-evidence" class="transition-evidence"></div>
+            <ol id="contribution-list" class="contribution-list"></ol>
+            <p class="score-caveat">
+              Signed scores are model weights, not probabilities or confidence percentages.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="learn-more" aria-labelledby="learn-title">
+        <div>
+          <p class="eyebrow">Under the hood</p>
+          <h2 id="learn-title">Follow the model all the way down.</h2>
+        </div>
+        <div class="resource-links">
+          <a href="https://sklearn-crfsuite.readthedocs.io/en/latest/" target="_blank" rel="noreferrer">
+            <span>Python estimator</span>
+            <strong>sklearn-crfsuite documentation</strong>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a href="https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html" target="_blank" rel="noreferrer">
+            <span>Weights and model API</span>
+            <strong>python-crfsuite reference</strong>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a href="https://github.com/chokkan/crfsuite" target="_blank" rel="noreferrer">
+            <span>Original implementation</span>
+            <strong>CRFsuite source and documentation</strong>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
       </section>
     </main>
 
     <footer>
       <p>Built to make sequence modeling visible.</p>
-      <p>Universal Dependencies POS labels · Static, backend-free prototype</p>
+      <p>
+        Universal Dependencies POS labels · Static and backend-free ·
+        <a href="https://github.com/UniversalDependencies/UD_English-GUM/blob/master/LICENSE.txt" target="_blank" rel="noreferrer">GUM corpus license</a>
+      </p>
     </footer>
 
+    <script src="crf.js"></script>
     <script src="fixtures.js"></script>
     <script src="app.js"></script>
   </body>

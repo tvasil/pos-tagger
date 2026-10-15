@@ -1,6 +1,6 @@
 from typing import Generator
 from pipeline.pipeline import Step
-from helpers import sent2features
+from helpers import sent2features, tokenize
 
 
 class ExtractFeaturesForCRFFromTreebank(Step):
@@ -25,9 +25,8 @@ class ExtractFeaturesForCRFFromTreebank(Step):
 class ExtractFeaturesForCRFFromList(Step):
     """
     Step to extract features from a batch of sentence lists, which has a
-    ["token1 token2 ...", "token3 token4 ..."] structure. Tokens are assumed
-    to be split by blank space (.split())
+    ["token1 token2 ...", "token3 token4 ..."] structure.
     """
     def run(self, batches: Generator):
         for sentence in batches:
-            yield sent2features(sentence.split())
+            yield sent2features(tokenize(sentence))
