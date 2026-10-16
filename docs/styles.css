@@ -101,6 +101,8 @@ main {
   cursor: pointer;
 }
 
+.source-link { font-size: 0.82rem; }
+
 .intro {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
