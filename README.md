@@ -1,6 +1,14 @@
 # Part-of-Speech tagger
 
-This project builds a [part-of-speech tagger](https://en.wikipedia.org/wiki/Part-of-speech_tagging) built using the [Conditional Random Fields](https://en.wikipedia.org/wiki/Conditional_random_field) probabilistic method. The projects contains all files you need to train, evaluate and make individual predictions on new observations.
+This project builds a [part-of-speech tagger](https://en.wikipedia.org/wiki/Part-of-speech_tagging) using the [Conditional Random Fields](https://en.wikipedia.org/wiki/Conditional_random_field) probabilistic method. The project contains everything needed to train, evaluate, and make predictions on new observations.
+
+<p align="center">
+  <a href="https://pos-tagger.pages.dev/">
+    <img src="https://img.shields.io/badge/Launch%20the%20interactive%20CRF%20explorer-pos--tagger.pages.dev-173f34?style=for-the-badge&amp;logo=cloudflare&amp;logoColor=white" alt="Launch the interactive CRF explorer">
+  </a>
+</p>
+
+<p align="center"><strong><a href="https://pos-tagger.pages.dev/">Try the live, backend-free POS tagger →</a></strong></p>
 
 ## Static browser demo
 
