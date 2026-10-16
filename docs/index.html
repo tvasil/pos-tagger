@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Explore how a conditional random field uses word features, context, and tag transitions to label a sentence.">
     <title>Explore a CRF part-of-speech tagger</title>
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=4">
   </head>
   <body>
     <header class="site-header">
@@ -15,7 +15,7 @@
       </a>
       <div class="header-actions">
         <span class="model-badge"><span aria-hidden="true"></span> Runs in your browser</span>
-        <button id="open-explainer" class="text-button" type="button" aria-haspopup="dialog">What is a CRF?</button>
+        <button id="open-explainer" class="text-button" type="button" aria-haspopup="dialog" hidden>CRF guide</button>
       </div>
     </header>
 
@@ -25,11 +25,16 @@
           <p class="eyebrow">Conditional random field · POS tagging</p>
           <h1 id="page-title">See context change a word’s grammatical role.</h1>
         </div>
-        <p class="intro-copy">
-          <a href="https://universaldependencies.org/u/pos/" target="_blank" rel="noreferrer">Part-of-speech tagging</a>
-          labels words as nouns, verbs, determiners, and more. Enter a sentence, then step through
-          the features and tag-to-tag connections this pre-LLM sequence model scores.
-        </p>
+        <div class="intro-aside">
+          <div class="hero-chain" aria-hidden="true">
+            <span>word features</span><i>+</i><span>tag transitions</span><i>→</i><strong>best path</strong>
+          </div>
+          <p class="intro-copy">
+            <a href="https://universaldependencies.org/u/pos/" target="_blank" rel="noreferrer">Part-of-speech tagging</a>
+            labels words as nouns, verbs, determiners, and more. Enter a sentence, then step through
+            the features and tag-to-tag connections this pre-LLM sequence model scores.
+          </p>
+        </div>
       </section>
 
       <aside id="crf-coachmark" class="coachmark" aria-label="About this model">
@@ -137,10 +142,7 @@
         </div>
       </section>
 
-      <p class="page-note">
-        Uses a lightweight demo tokenizer, so complex Universal Dependencies tokenization may differ.
-        <button id="open-methodology" type="button">Model details and reading ↗</button>
-      </p>
+      <p class="page-note">Uses a lightweight demo tokenizer, so complex Universal Dependencies tokenization may differ.</p>
     </main>
 
     <dialog id="crf-dialog" class="crf-dialog" aria-labelledby="dialog-title">
@@ -202,8 +204,8 @@
       </form>
     </dialog>
 
-    <script src="crf.js?v=3"></script>
-    <script src="tags.js?v=3"></script>
-    <script src="app.js?v=3"></script>
+    <script src="crf.js?v=4"></script>
+    <script src="tags.js?v=4"></script>
+    <script src="app.js?v=4"></script>
   </body>
 </html>

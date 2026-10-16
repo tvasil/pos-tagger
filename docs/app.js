@@ -24,6 +24,7 @@
   const inspector = document.querySelector(".inspector");
   const dialog = document.querySelector("#crf-dialog");
   const coachmark = document.querySelector("#crf-coachmark");
+  const openExplainer = document.querySelector("#open-explainer");
 
   const stageCopy = {
     1: ["1 · Tokenize", "Split the sentence into the units the model will label."],
@@ -105,12 +106,10 @@
       button.append(dot);
     }
 
-    if (activeStep === 3) {
-      const score = document.createElement("span");
-      score.className = "node-score";
-      score.textContent = `state ${signedScore(chosenStateScore(index))}`;
-      button.append(score);
-    }
+    const score = document.createElement("span");
+    score.className = "node-score";
+    score.textContent = activeStep === 3 ? `state ${signedScore(chosenStateScore(index))}` : "";
+    button.append(score);
 
     if (showTransition) {
       const arrow = document.createElement("span");
@@ -360,11 +359,11 @@
   });
 
   playButton.addEventListener("click", playSteps);
-  document.querySelector("#open-explainer").addEventListener("click", () => openDialog(false));
+  openExplainer.addEventListener("click", () => openDialog(false));
   document.querySelector("#coachmark-learn").addEventListener("click", () => openDialog(false));
-  document.querySelector("#open-methodology").addEventListener("click", () => openDialog(true));
   document.querySelector("#dismiss-coachmark").addEventListener("click", () => {
     coachmark.hidden = true;
+    openExplainer.hidden = false;
     try { localStorage.setItem("crf-introduction-dismissed", "true"); } catch (error) { /* storage is optional */ }
   });
   dialog.addEventListener("click", (event) => {
@@ -376,6 +375,7 @@
   } catch (error) {
     coachmark.hidden = false;
   }
+  openExplainer.hidden = !coachmark.hidden;
 
   tagSentence(input.value);
 })();
