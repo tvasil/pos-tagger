@@ -4,7 +4,7 @@ This project builds a [part-of-speech tagger](https://en.wikipedia.org/wiki/Part
 
 ## Static browser demo
 
-The `docs/` directory contains a dependency-free, backend-free visual demo. It starts with two clearly labeled precomputed examples that explain contextual tagging, then lets visitors tag arbitrary English sentences using the real CRF entirely in the browser.
+The `docs/` directory contains a dependency-free, backend-free visual workbench. Visitors can tag arbitrary English sentences with the real CRF, inspect learned feature and transition weights, and step through a compact visualization of the sequence-decoding process. Two ambiguity examples are available as presets, but they run through the same browser model as typed input rather than using precomputed predictions.
 
 The browser downloads a 5.2 MB JSON artifact containing the trained model's 17 labels, 235,380 state-feature weights, and 289 transition weights. JavaScript ports the Python feature extraction and runs first-order Viterbi decoding locally; it does not run `sklearn-crfsuite` or substitute a different model.
 
@@ -54,10 +54,14 @@ node scripts/validate-browser-model.js \
 Current limitations:
 
 - The shared tokenizer separates punctuation and keeps apostrophes inside words, but it is not a complete Universal Dependencies tokenizer. Complex contractions and corpus-specific multiword tokens may differ.
-- The JSON is loaded lazily on the first live prediction. It is much smaller than the 12 MB native model but remains a meaningful download.
+- The JSON loads when the workbench opens so the default example is immediately interactive. It is much smaller than the 12 MB native model but remains a meaningful 5.2 MB download.
 - The UI exposes signed state and transition weights, not confidence percentages. Token marginals would require a forward-backward implementation in addition to Viterbi.
 - The feature port targets this English model. Some Unicode casing behavior can differ between Python and JavaScript outside the training domain.
 - UD English GUM is distributed under [CC BY-NC-SA 4.0](https://github.com/UniversalDependencies/UD_English-GUM/blob/master/LICENSE.txt). Review its attribution, non-commercial, and share-alike terms before redistributing or using the trained artifact beyond this portfolio demo.
+
+### Future work
+
+- Add a deliberately naive word-lookup baseline, built from each training word's most frequent tag, so visitors can compare independent token classification with the CRF's context-aware sequence prediction. Unseen words should use an explicitly documented fallback tag, and the baseline should be evaluated on the same split as the CRF.
 
 Model and library references: [sklearn-crfsuite](https://sklearn-crfsuite.readthedocs.io/en/latest/), [python-crfsuite API](https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html), and the [original CRFsuite implementation](https://github.com/chokkan/crfsuite).
 

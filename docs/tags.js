@@ -1,27 +1,3 @@
-window.POS_DEMO_FIXTURES = [
-  {
-    sentence: "I can fish.",
-    focusToken: 1,
-    tokens: [
-      { text: "I", tag: "PRON" },
-      { text: "can", tag: "AUX" },
-      { text: "fish", tag: "VERB" },
-      { text: ".", tag: "PUNCT" }
-    ]
-  },
-  {
-    sentence: "A can of fish.",
-    focusToken: 1,
-    tokens: [
-      { text: "A", tag: "DET" },
-      { text: "can", tag: "NOUN" },
-      { text: "of", tag: "ADP" },
-      { text: "fish", tag: "NOUN" },
-      { text: ".", tag: "PUNCT" }
-    ]
-  }
-];
-
 window.POS_TAGS = {
   ADJ: { name: "Adjective", color: "pink" },
   ADP: { name: "Adposition", color: "blue" },

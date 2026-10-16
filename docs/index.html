@@ -3,93 +3,101 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta
-      name="description"
-      content="An interactive explanation of context-aware part-of-speech tagging with a conditional random field."
-    >
-    <title>Inside a context-aware POS tagger</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Explore how a conditional random field uses word features, context, and tag transitions to label a sentence.">
+    <title>Explore a CRF part-of-speech tagger</title>
+    <link rel="stylesheet" href="styles.css?v=3">
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="POS tagger demo home">
+      <a class="brand" href="#top" aria-label="CRF explorer home">
         <span class="brand-mark" aria-hidden="true">Aa</span>
-        <span>Context Tags</span>
+        <span>CRF tag explorer</span>
       </a>
-      <span class="prototype-badge">Browser CRF · no backend</span>
+      <div class="header-actions">
+        <span class="model-badge"><span aria-hidden="true"></span> Runs in your browser</span>
+        <button id="open-explainer" class="text-button" type="button" aria-haspopup="dialog">What is a CRF?</button>
+      </div>
     </header>
 
     <main id="top">
-      <section class="hero" aria-labelledby="page-title">
-        <div class="hero-copy">
-          <p class="eyebrow">Conditional random field · visualized</p>
-          <h1 id="page-title">A word does not choose its tag alone.</h1>
-          <p class="hero-intro">
-            Change the sentence around <em>can</em> and see its grammatical role change.
-            This tagger considers each word, its neighbors, and the surrounding tag sequence.
-          </p>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Conditional random field · POS tagging</p>
+          <h1 id="page-title">See context change a word’s grammatical role.</h1>
         </div>
-
-        <div class="sequence-card" aria-label="How the tagger reaches a prediction">
-          <p class="sequence-title">From sentence to sequence</p>
-          <ol>
-            <li><span>01</span> Observe each token</li>
-            <li><span>02</span> Read local context</li>
-            <li><span>03</span> Score the full tag sequence</li>
-          </ol>
-        </div>
+        <p class="intro-copy">
+          <a href="https://universaldependencies.org/u/pos/" target="_blank" rel="noreferrer">Part-of-speech tagging</a>
+          labels words as nouns, verbs, determiners, and more. Enter a sentence, then step through
+          the features and tag-to-tag connections this pre-LLM sequence model scores.
+        </p>
       </section>
 
-      <section class="demo-shell" aria-labelledby="demo-title">
-        <div class="demo-heading">
+      <aside id="crf-coachmark" class="coachmark" aria-label="About this model">
+        <div class="mini-chain" aria-hidden="true">
+          <span>word</span><i></i><span>word</span><i></i><span>word</span>
+        </div>
+        <div>
+          <strong>New to conditional random fields?</strong>
+          <p>They are graph models for labeling connected sequences—not independent word lookups.</p>
+        </div>
+        <button id="coachmark-learn" class="coachmark-link" type="button">Learn the idea</button>
+        <button id="dismiss-coachmark" class="icon-button" type="button" aria-label="Dismiss introduction">×</button>
+      </aside>
+
+      <section class="workbench" aria-labelledby="workbench-title">
+        <div class="workbench-topbar">
           <div>
-            <p class="eyebrow">Interactive demo</p>
-            <h2 id="demo-title">Try the same word in two contexts</h2>
+            <p class="panel-kicker">Live browser model</p>
+            <h2 id="workbench-title">Tag a sentence</h2>
           </div>
-          <p class="mock-note">
-            <strong>Prototype note:</strong> POS predictions are precomputed for the examples below.
-            Feature inspection and interactions are live.
-          </p>
+          <p class="privacy-note"><strong>Local:</strong> your text is not sent anywhere.</p>
         </div>
 
-        <form id="sentence-form" class="sentence-form">
-          <label for="sentence-input">Sentence</label>
+        <form id="tag-form" class="tag-form">
+          <label for="sentence-input">English sentence</label>
           <div class="input-row">
-            <input
-              id="sentence-input"
-              name="sentence"
-              type="text"
-              value="I can fish."
-              autocomplete="off"
-              spellcheck="false"
-              aria-describedby="input-help form-status"
-            >
-            <button type="submit">Tag sentence</button>
+            <input id="sentence-input" name="sentence" type="text" value="I can fish." autocomplete="off" spellcheck="false" aria-describedby="input-help model-status">
+            <button type="submit">Run the CRF</button>
           </div>
-          <div class="input-footer">
-            <p id="input-help">This prototype recognizes the two precomputed examples.</p>
-            <div class="example-buttons" aria-label="Example sentences">
+          <div class="input-meta">
+            <div class="examples" aria-label="Try an ambiguity example">
+              <span>Compare context:</span>
               <button class="example-button" type="button" data-example="I can fish.">I can fish.</button>
               <button class="example-button" type="button" data-example="A can of fish.">A can of fish.</button>
             </div>
+            <p id="input-help">The 5.2 MB exported model loads once and is cached by your browser.</p>
           </div>
-          <p id="form-status" class="form-status" role="status" aria-live="polite" tabindex="-1"></p>
+          <p id="model-status" class="model-status" role="status" aria-live="polite">Loading the CRF model…</p>
         </form>
 
-        <div class="results-grid">
-          <section class="tokens-panel" aria-labelledby="tokens-title">
-            <div class="panel-heading">
+        <div id="results" class="results" hidden>
+          <section class="sequence-panel" aria-labelledby="sequence-title">
+            <div class="sequence-toolbar">
               <div>
-                <p class="panel-kicker">Predicted sequence</p>
-                <h3 id="tokens-title">Select a token to inspect it</h3>
+                <p class="panel-kicker">Sequence view</p>
+                <h3 id="sequence-title">How the model reached these tags</h3>
               </div>
-              <span class="token-count" id="token-count"></span>
+              <button id="play-steps" class="play-button" type="button"><span aria-hidden="true">▶</span> Play steps</button>
             </div>
 
-            <div id="token-list" class="token-list" aria-label="Tagged tokens"></div>
+            <ol id="process-steps" class="process-steps" aria-label="CRF decoding stages">
+              <li><button type="button" data-step="1"><span>1</span>Tokenize</button></li>
+              <li><button type="button" data-step="2"><span>2</span>Observe</button></li>
+              <li><button type="button" data-step="3"><span>3</span>Score tags</button></li>
+              <li><button type="button" data-step="4"><span>4</span>Connect</button></li>
+              <li><button type="button" data-step="5"><span>5</span>Decode</button></li>
+            </ol>
+
+            <div class="stage" aria-live="polite">
+              <div class="stage-copy">
+                <strong id="stage-title"></strong>
+                <span id="stage-description"></span>
+              </div>
+              <div id="sequence-track" class="sequence-track" aria-label="Tagged sentence"></div>
+            </div>
 
             <div class="legend" aria-labelledby="legend-title">
-              <h4 id="legend-title">Tag legend</h4>
+              <h4 id="legend-title">Tags in this sentence</h4>
               <ul id="tag-legend"></ul>
             </div>
           </section>
@@ -97,139 +105,105 @@
           <aside class="inspector" aria-labelledby="inspector-title">
             <div class="inspector-heading">
               <div>
-                <p class="panel-kicker">Token features</p>
+                <p class="panel-kicker">Selected token</p>
                 <h3 id="inspector-title">Choose a token</h3>
               </div>
               <span id="inspector-tag" class="inspector-tag"></span>
             </div>
-            <p id="inspector-summary" class="inspector-summary">
-              Select any tagged word to see the observations made available to the CRF.
-            </p>
-            <div id="feature-groups" class="feature-groups"></div>
+
+            <div class="context-strip" aria-label="Selected token and its neighbors">
+              <span id="previous-token"></span>
+              <strong id="current-token"></strong>
+              <span id="next-token"></span>
+            </div>
+
+            <section class="inspector-section" aria-labelledby="observations-title">
+              <div class="section-heading"><h4 id="observations-title">Observed features</h4><span>input</span></div>
+              <dl id="feature-list" class="feature-list"></dl>
+            </section>
+
+            <section class="inspector-section weights-section" aria-labelledby="weights-title">
+              <div class="section-heading"><h4 id="weights-title">Strongest learned weights</h4><span>state score</span></div>
+              <ol id="contribution-list" class="contribution-list"></ol>
+            </section>
+
+            <section class="inspector-section transition-section" aria-labelledby="transition-title">
+              <div class="section-heading"><h4 id="transition-title">Previous-tag transition</h4><span>sequence score</span></div>
+              <div id="transition-evidence" class="transition-evidence"></div>
+            </section>
+
+            <p class="score-caveat">Weights are signed score contributions, not probabilities or confidence.</p>
           </aside>
         </div>
       </section>
 
-      <section class="comparison" aria-labelledby="comparison-title">
-        <div class="comparison-copy">
-          <p class="eyebrow">The context test</p>
-          <h2 id="comparison-title">Same spelling. Different evidence.</h2>
-          <p>
-            The lexical features of <em>can</em> stay the same. Its neighbors change, giving the
-            sequence model different evidence for <strong>auxiliary</strong> and <strong>noun</strong>.
-          </p>
-        </div>
-
-        <div id="comparison-cards" class="comparison-cards"></div>
-
-        <p class="interpretation-note">
-          This opening example shows relevant inputs rather than claiming a causal explanation.
-          The live model below exposes actual learned weights and decodes the full sequence locally.
-        </p>
-      </section>
-
-      <section class="live-shell" aria-labelledby="live-title">
-        <div class="live-heading">
-          <div>
-            <p class="eyebrow">Full browser model</p>
-            <h2 id="live-title">Now try your own sentence.</h2>
-          </div>
-          <div class="local-model-note">
-            <span class="local-model-dot" aria-hidden="true"></span>
-            <p><strong>Runs locally.</strong> The exported CRF weights and Viterbi decoder stay in your browser.</p>
-          </div>
-        </div>
-
-        <form id="live-form" class="live-form">
-          <label for="live-input">Any English sentence</label>
-          <div class="input-row">
-            <input
-              id="live-input"
-              name="sentence"
-              type="text"
-              value="The quick brown fox jumps over the lazy dog."
-              autocomplete="off"
-              spellcheck="false"
-              aria-describedby="live-help live-status"
-            >
-            <button type="submit">Run CRF locally</button>
-          </div>
-          <div class="live-form-footer">
-            <p id="live-help">The 5.2 MB model loads on first use. No text is sent anywhere.</p>
-            <p class="tokenizer-note">Uses a lightweight demo tokenizer; complex UD tokenization may differ.</p>
-          </div>
-          <p id="live-status" class="live-status" role="status" aria-live="polite"></p>
-        </form>
-
-        <div id="live-results" class="live-results" hidden>
-          <section class="live-sequence" aria-labelledby="live-sequence-title">
-            <div class="panel-heading">
-              <div>
-                <p class="panel-kicker">Decoded sequence</p>
-                <h3 id="live-sequence-title">Select a token to inspect its score</h3>
-              </div>
-              <span id="live-token-count" class="token-count"></span>
-            </div>
-            <div id="live-token-list" class="token-list" aria-label="Locally tagged tokens"></div>
-            <p class="sequence-explanation">
-              Viterbi finds the highest-scoring tag sequence using both token features and transitions
-              between neighboring tags.
-            </p>
-          </section>
-
-          <aside class="evidence-panel" aria-labelledby="evidence-title">
-            <div class="inspector-heading">
-              <div>
-                <p class="panel-kicker">Learned evidence</p>
-                <h3 id="evidence-title">Feature contributions</h3>
-              </div>
-              <span id="evidence-tag" class="inspector-tag"></span>
-            </div>
-            <p id="evidence-summary" class="inspector-summary"></p>
-            <div id="transition-evidence" class="transition-evidence"></div>
-            <ol id="contribution-list" class="contribution-list"></ol>
-            <p class="score-caveat">
-              Signed scores are model weights, not probabilities or confidence percentages.
-            </p>
-          </aside>
-        </div>
-      </section>
-
-      <section class="learn-more" aria-labelledby="learn-title">
-        <div>
-          <p class="eyebrow">Under the hood</p>
-          <h2 id="learn-title">Follow the model all the way down.</h2>
-        </div>
-        <div class="resource-links">
-          <a href="https://sklearn-crfsuite.readthedocs.io/en/latest/" target="_blank" rel="noreferrer">
-            <span>Python estimator</span>
-            <strong>sklearn-crfsuite documentation</strong>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a href="https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html" target="_blank" rel="noreferrer">
-            <span>Weights and model API</span>
-            <strong>python-crfsuite reference</strong>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a href="https://github.com/chokkan/crfsuite" target="_blank" rel="noreferrer">
-            <span>Original implementation</span>
-            <strong>CRFsuite source and documentation</strong>
-            <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-      </section>
+      <p class="page-note">
+        Uses a lightweight demo tokenizer, so complex Universal Dependencies tokenization may differ.
+        <button id="open-methodology" type="button">Model details and reading ↗</button>
+      </p>
     </main>
 
-    <footer>
-      <p>Built to make sequence modeling visible.</p>
-      <p>
-        Universal Dependencies POS labels · Static and backend-free ·
-        <a href="https://github.com/UniversalDependencies/UD_English-GUM/blob/master/LICENSE.txt" target="_blank" rel="noreferrer">GUM corpus license</a>
-      </p>
-    </footer>
+    <dialog id="crf-dialog" class="crf-dialog" aria-labelledby="dialog-title">
+      <form method="dialog" class="dialog-frame">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">A short introduction</p>
+            <h2 id="dialog-title">What is a conditional random field?</h2>
+          </div>
+          <button class="dialog-close" value="close" aria-label="Close explanation">×</button>
+        </div>
 
-    <script src="crf.js"></script>
-    <script src="fixtures.js"></script>
-    <script src="app.js"></script>
+        <div class="dialog-body">
+          <div class="graph-explainer" aria-label="A sentence represented as a chain graph">
+            <div class="graph-label-row" aria-hidden="true"><span>PRON</span><i></i><span>AUX</span><i></i><span>VERB</span></div>
+            <div class="graph-word-row" aria-hidden="true"><span>I</span><span>can</span><span>fish</span></div>
+            <p>Observed words and features inform each label; neighboring labels are connected.</p>
+          </div>
+
+          <div class="dialog-copy">
+            <p>
+              A CRF is a <strong>discriminative, undirected probabilistic graph model</strong>.
+              In a linear-chain CRF, each output label is a node connected to the labels beside it.
+              It extends the idea of logistic regression from one classification to an interconnected
+              sequence of classifications.
+            </p>
+            <p>
+              That structure makes CRFs useful for <strong>sequence labeling</strong>: part-of-speech
+              tagging, named entity recognition (NER), and other tasks where nearby labels and observations
+              carry information. This demo combines feature weights with adjacent-tag transition weights,
+              then uses Viterbi decoding to choose the highest-scoring complete path.
+            </p>
+          </div>
+
+          <div class="reading-list">
+            <h3>Read more</h3>
+            <a href="https://en.wikipedia.org/wiki/Conditional_random_field" target="_blank" rel="noreferrer"><span>Overview</span><strong>Conditional random field — Wikipedia</strong><span aria-hidden="true">↗</span></a>
+            <a href="https://www.reddit.com/r/MachineLearning/comments/n14ov/explain_conditional_random_fields_like_im_stupid/" target="_blank" rel="noreferrer"><span>Informal</span><strong>A beginner-friendly graph explanation</strong><span aria-hidden="true">↗</span></a>
+            <a href="https://arxiv.org/pdf/1011.4088" target="_blank" rel="noreferrer"><span>Tutorial</span><strong>Sutton &amp; McCallum: An Introduction to CRFs</strong><span aria-hidden="true">↗</span></a>
+            <a href="https://medium.com/ml2vec/overview-of-conditional-random-fields-68a2a20fa541" target="_blank" rel="noreferrer"><span>Walkthrough</span><strong>CRFs as sequential logistic regression</strong><span aria-hidden="true">↗</span></a>
+            <a href="https://www.youtube.com/watch?v=qQEQiPAxFxM" target="_blank" rel="noreferrer"><span>Video</span><strong>Conditional random fields explained</strong><span aria-hidden="true">↗</span></a>
+          </div>
+
+          <details class="methodology">
+            <summary>About this implementation</summary>
+            <p>
+              Training happens offline in Python. This static page downloads the exported labels,
+              state-feature weights, and transition weights, ports the same feature extraction to
+              JavaScript, and runs first-order Viterbi decoding locally. It does not run
+              <code>sklearn-crfsuite</code> in the browser or substitute a different model.
+            </p>
+            <p>
+              <a href="https://sklearn-crfsuite.readthedocs.io/en/latest/" target="_blank" rel="noreferrer">sklearn-crfsuite docs</a>
+              · <a href="https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html" target="_blank" rel="noreferrer">python-crfsuite API</a>
+              · <a href="https://github.com/chokkan/crfsuite" target="_blank" rel="noreferrer">CRFsuite source</a>
+            </p>
+          </details>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="crf.js?v=3"></script>
+    <script src="tags.js?v=3"></script>
+    <script src="app.js?v=3"></script>
   </body>
 </html>
